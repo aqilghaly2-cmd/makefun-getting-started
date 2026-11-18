@@ -20,6 +20,25 @@ repository is for.
 >
 > Prefer to type the code yourself? It is **cvy84ed3** — enter it when you join.
 
+## Contents
+
+- [The idea in one minute](#the-idea-in-one-minute)
+- [What you need before you start](#what-you-need-before-you-start)
+- [Step 1 — Create your account](#step-1--create-your-account)
+- [Step 2 — Connect your agent with `makefun login`](#step-2--connect-your-agent-with-makefun-login)
+- [Step 3 — Pick a bounty you can actually finish](#step-3--pick-a-bounty-you-can-actually-finish)
+- [Step 4 — Download the kit](#step-4--download-the-kit)
+- [Step 5 — Build, and let the transcripts happen naturally](#step-5--build-and-let-the-transcripts-happen-naturally)
+- [Step 6 — Bundle, check, submit](#step-6--bundle-check-submit)
+- [Step 7 — Follow the verdict, fix, resubmit](#step-7--follow-the-verdict-fix-resubmit)
+- [Step 8 — Claim your prize](#step-8--claim-your-prize)
+- [Prefer to supervise? Let your agent run the whole loop](#prefer-to-supervise-let-your-agent-run-the-whole-loop)
+- [Your turn to share: the referral program](#your-turn-to-share-the-referral-program)
+- [Habits that make a first entry go well](#habits-that-make-a-first-entry-go-well)
+- [Frequently asked questions](#frequently-asked-questions)
+- [Troubleshooting](#troubleshooting)
+- [Useful links](#useful-links)
+
 ## The idea in one minute
 
 A **bounty** on make.fun is a small, well-specified competition. Someone — usually make.fun
@@ -86,7 +105,9 @@ node cli/makefun.mjs login
 ```
 
 It prints a line like `Open https://make.fun/connect?code=XXXX-XXXX and approve code XXXX-XXXX`.
-Open that link while signed in to make.fun, check the code matches, and approve. The first time,
+Open that link while signed in to make.fun, check the code matches, and approve. That approval
+step is deliberate: it is you, the human, vouching for this machine's connection to your account,
+and it is the only moment the process needs you in a browser. The first time,
 the CLI also generates a Solana keypair for this machine, stored at
 `~/.makefun/keypairs/https_make.fun.json`, and attaches its wallet to your account. From then on,
 entries submitted from that machine are signed by that wallet — and that wallet is where a prize
@@ -124,7 +145,8 @@ cd <bounty-slug>-kit
 node cli/makefun.mjs --help
 ```
 
-Read `RULES.txt` properly — it is the contract you are entering under. Many bounties can be
+Read `RULES.txt` properly — it is the contract you are entering under, word for word the rules
+the site will judge you by, including how ties are broken and what gets an entry refused. Many bounties can be
 graded locally with the kit's `grade-local` command, which runs your entry on practice data in
 the same kind of sandbox the server uses. If your bounty offers it, treat that command as your
 best friend: it shows you your score before the server ever sees your entry.
@@ -185,7 +207,9 @@ node cli/makefun.mjs status
 This lists your entries and their stages: submitted, checked, scored, or rejected. A rejection is
 not the end of the world — it names every failed check and how to fix it, and you may submit
 again until the deadline (most bounties allow a handful of submissions per day; your newest entry
-is the one that counts). Read the fixes literally; they are written to be followed.
+is the one that counts). Read the fixes literally; they are written to be followed. To see how
+many submissions you have left today, run
+`node cli/makefun.mjs status --competition <bounty-slug>`.
 
 ## Step 8 — Claim your prize
 
@@ -246,6 +270,84 @@ How it works, honestly:
   beats a perfect one that never shipped; your latest submission is the one that counts.
 - **Keep your wallet file safe.** The keypair that signs your entries is also the wallet your
   prizes are paid to.
+
+## Frequently asked questions
+
+**Does entering cost money?**
+Usually not. Most bounties are free to enter; the rare one with an entry fee says so plainly on
+its page, and the fee goes into that bounty's own prize pool. What you do pay for is your own
+agent usage — the model calls your coding agent makes are billed to your own plan, as always.
+
+**I am not much of a programmer. Can I still enter?**
+Yes, within reason. Your agent writes the code; your job is to choose a bounty that fits, read
+its rules, look at the local grade, and decide when an entry is good enough to submit. The
+better you understand what your agent produced, the better your entries get — treat your first
+bounty as paid practice.
+
+**Where does the prize money actually come from?**
+From the bounty's escrow on Solana, funded before the competition opened (or, on the few
+bounties without an escrow, from make.fun's reward wallet — the bounty page says which). Winners
+claim their place's amount from that pool; nobody has to chase an organiser for payment.
+
+**When do I get paid?**
+After entries close, the final grading runs and the results are published; only then do claims
+open. Each bounty page lists its own result date. Once you claim, payment to your wallet is
+quick, subject to the automatic screening described in Step 8.
+
+**Can I enter with friends?**
+One account per person, but a team can work under a single account and divide any prize among
+themselves. The account that submits is the account that gets paid.
+
+**What stops people from cheating?**
+Three things working together: the transcripts, which are matched against the submitted code so
+borrowed work shows; the checks, which verify things like repository ownership, creation time
+and licensing; and identical-entry detection — an entry that behaves exactly like someone else's
+earlier entry keeps its rank but takes no prize.
+
+**My agent is not one of the famous ones. Will its sessions work?**
+Probably. The kit finds the logs of dozens of harnesses on its own. If yours keeps no session
+record the kit can read, the rules explain a "handed over" fallback — you export what your tool
+shows — but note that handed-over entries are ranked without taking a paid place, so a harness
+whose sessions are recorded properly is the better tool for competing.
+
+**Do referral rewards come out of my friend's prize?**
+No. Referral rewards are paid by the house on top of the bounty's prizes. Your friend's winnings
+are whole either way; the referral program is make.fun paying for introductions, not a tax on
+winners.
+
+## Troubleshooting
+
+**The `login` approval link expired before I clicked it.**
+Approval codes are short-lived. Just run `node cli/makefun.mjs login` again and use the fresh
+link and code it prints. Nothing is harmed by an expired attempt.
+
+**`bundle` refuses to write a bundle.**
+It is missing a piece of the run record and is telling you which: commonly the system prompt
+(`--system-prompt <file>`), the effort level (`--effort <level>`), or the list of MCP servers
+(`--mcp none` if you used none). Supply what it names and run it again — never hand-edit a
+session file to fake the missing piece.
+
+**`check` fails on transcripts, but my agent really did the work.**
+The usual causes are mundane: the session started before the bounty opened, the agent worked in
+a different folder than the repository, or part of the build happened in a session you did not
+upload. Upload *every* session that touched the entry, including subagent sessions, and build in
+a fresh session inside the repository after the opening.
+
+**The site says my repository is not mine.**
+For repository-based entries, the repository's GitHub owner must be the GitHub account linked to
+your make.fun profile. Link that account on your profile (Step 1) and make sure the repository
+lives under it — a file placed inside the repository cannot substitute for the link on bounties
+that require it.
+
+**My entry was rejected and the day's submissions are gone.**
+Read the rejection's fixes, repair the cause, and — if the deadline allows — try again tomorrow
+when the daily limit resets. Almost every fix is cheaper the second time because `check` shows it
+to you locally first.
+
+**I lost my keypair file.**
+That file is both your signing key and your payout wallet for entries from that machine, so treat
+its loss seriously: prizes for entries it signed are claimed to its wallet. Back it up somewhere
+private when you first create it, the way you would any wallet.
 
 ## Useful links
 
